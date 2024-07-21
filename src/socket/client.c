@@ -59,6 +59,10 @@ int main() {
     char msg[] = "Test content\n";
     write(client_fd, msg, sizeof(msg));
 
+    char buf[256];
+    read(client_fd, buf, sizeof(buf));
+    printf("[Server] %s\n", buf);
+
     close(client_fd);
     return 0;
 }

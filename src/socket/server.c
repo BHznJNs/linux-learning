@@ -72,7 +72,8 @@ int main() {
 
         char* client_hostname = inet_ntoa(socket_addr.sin_addr);
         printf("Client: %s\n", client_hostname);
-        char buf[NET_ERR_LEN];
+
+        char buf[256];
         read(client_fd, buf, sizeof(buf));
         printf("Client message: %s\n", buf);
 

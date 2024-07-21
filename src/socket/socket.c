@@ -24,11 +24,11 @@ int create_socket() {
 
 void panic(const char *fmt, ...) {
     va_list ap;
-    char msg[NET_ERR_LEN];
+    char msg[256];
 
     if (!msg) return;
     va_start(ap, fmt);
-    vsnprintf(msg, NET_ERR_LEN, fmt, ap);
+    vsnprintf(msg, sizeof(msg), fmt, ap);
     va_end(ap);
 
     perror(msg);
