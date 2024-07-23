@@ -10,8 +10,15 @@ target("socket_client")
     add_files("src/socket/client.c")
     add_files("src/socket/socket.c")
 
-target("socket_benchmark")
+-- -- -- -- -- -- -- -- -- --
+
+target("socket_simu_server")
     set_kind("binary")
-    add_files("src/socket/benchmark.c")
+    add_files("src/socket/simu_server.c")
+    add_files("src/socket/socket.c")
+
+target("socket_simu_client")
+    set_kind("binary")
+    add_files("src/socket/simu_client.c")
     add_files("src/socket/socket.c")
 

@@ -9,9 +9,6 @@
 #include "socket.h"
 
 static struct sockaddr_in* create_addr(int socket_fd, char* bindaddr, int port);
-static void try_bind(int socket_fd, struct sockaddr_in* socket_addr);
-static void try_listen(int socket_fd);
-
 int server(char *bindaddr, int port);
 
 // --- --- --- --- --- ---
@@ -33,22 +30,6 @@ static struct sockaddr_in* create_addr(int socket_fd, char* bindaddr, int port) 
         }
     }
     return socket_addr;
-}
-
-static void try_bind(int socket_fd, struct sockaddr_in* socket_addr) {
-    int status_code = bind(socket_fd, (struct sockaddr*)socket_addr, sizeof(struct sockaddr));
-    if (status_code == -1) {
-        close(socket_fd);
-        panic("socket bind: %s\n", strerror(errno));
-    }
-}
-
-static void try_listen(int socket_fd) {
-    int status_code = listen(socket_fd, 64);
-    if (status_code == -1) {
-        close(socket_fd);
-        panic("listen: %s\n", strerror(errno));
-    }
 }
 
 // start a tcp server that listens the given port and address
