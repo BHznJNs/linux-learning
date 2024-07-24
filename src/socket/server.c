@@ -9,7 +9,7 @@
 #include "socket.h"
 
 static struct sockaddr_in* create_addr(int socket_fd, char* bindaddr, int port);
-int server(char *bindaddr, int port);
+static int server(char *bindaddr, int port);
 
 // --- --- --- --- --- ---
 
@@ -33,7 +33,7 @@ static struct sockaddr_in* create_addr(int socket_fd, char* bindaddr, int port) 
 }
 
 // start a tcp server that listens the given port and address
-int server(char *bindaddr, int port) {
+static int server(char *bindaddr, int port) {
     int socket_fd = create_socket();
 
     struct sockaddr_in* socket_addr = create_addr(socket_fd, bindaddr, port);

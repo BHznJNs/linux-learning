@@ -10,7 +10,7 @@
 #include "socket.h"
 
 static struct sockaddr_in* create_addr(char *addr, int port);
-int client(char *addr, int port);
+static int client(char *addr, int port);
 
 // --- --- --- --- --- ---
 
@@ -36,7 +36,7 @@ static struct sockaddr_in* create_addr(char *addr, int port) {
     return socket_addr;
 }
 
-int client(char *addr, int port) {
+static int client(char *addr, int port) {
     int socket_fd = create_socket();
     struct sockaddr_in* socket_addr = create_addr(addr, port);
     try_connect(socket_fd, socket_addr, sizeof(socket_addr));
@@ -46,7 +46,7 @@ int client(char *addr, int port) {
 int main() {
     int client_fd = client(BIND_ADDR, BIND_PORT);
 
-    char msg[] = "Test content\n";
+    char msg[] = "Test content";
     write(client_fd, msg, sizeof(msg));
 
     char buf[256];

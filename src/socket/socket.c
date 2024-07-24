@@ -27,14 +27,9 @@ int create_socket() {
 }
 
 void set_nonblock(int socket_fd) {
-    int flags;
-    flags = fcntl(socket_fd, F_GETFL);
-    if (flags == -1) {
-        close(socket_fd);
-        panic("fcntl(F_GETFL): %s\n", strerror(errno));
-    }
-    flags = fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
-    if (flags == -1) {
+    int old_flags = fcntl(socket_fd, F_GETFL);
+    int new_flags = old_flags | O_NONBLOCK;
+    if (fcntl(socket_fd, F_SETFL, new_flags) == -1) {
         close(socket_fd);
         panic("fcntl(F_SETFL,O_NONBLOCK): %s\n", strerror(errno));
     }

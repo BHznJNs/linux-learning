@@ -15,7 +15,7 @@
 #define CLIENT_COUNT 4
 
 static struct sockaddr_in* create_addr(char *addr, int port);
-int client(char *addr, int port);
+static int nonblock_client(char *addr, int port);
 
 // --- --- --- --- --- ---
 
@@ -41,7 +41,7 @@ static struct sockaddr_in* create_addr(char *addr, int port) {
     return socket_addr;
 }
 
-int client(char *addr, int port) {
+static int nonblock_client(char *addr, int port) {
     int socket_fd = create_socket();
     struct sockaddr_in* socket_addr = create_addr(addr, port);
     set_nonblock(socket_fd);
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     int client_fds[CLIENT_COUNT];
 
     for (int i=0; i<CLIENT_COUNT; i++) {
-        client_fds[i] = client(BIND_ADDR, BIND_PORT);
+        client_fds[i] = nonblock_client(BIND_ADDR, BIND_PORT);
     }
 
     int max_fd = 0;
@@ -71,18 +71,24 @@ int main(int argc, char** argv) {
     }
 
     struct timeval tv;
-    tv.tv_sec = 1;
+    tv.tv_sec = 10;
     tv.tv_usec = 0;
 
     int ret_val;
-    ret_val = select(max_fd + 1, &rfds, NULL, NULL, &tv);
+    ret_val = select(max_fd + 1, NULL, &wfds, NULL, &tv);
+    printf("select return value: %d\n", ret_val);
     if (ret_val > 0) {
+        short index = 1;
         for (int i=0; i<CLIENT_COUNT; i++) {
             int fd = client_fds[i];
             check_connect(fd);
             if (FD_ISSET(fd, &wfds)) {
-                char msg[] = "Test content";
-                write(fd, msg, sizeof(msg));
+                char msg[20];
+                sprintf(msg, "Test content %d", index);
+                printf("[DEBUG] write content: %s\n", msg);
+                write(fd, msg, strlen(msg));
+
+                index += 1;
             }
         }
     }
