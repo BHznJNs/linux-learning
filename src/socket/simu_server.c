@@ -79,10 +79,14 @@ int main() {
     int server_fd = server(BIND_ADDR, BIND_PORT);
     int client_fds[MAX_CONNECTION];
 
+    struct timeval tv;
+    tv.tv_sec = 2;
+    tv.tv_usec = 0;
+
     while (1) {
         printf("[DEBUG] Loop started\n");
-        int client_index = 0;
 
+        int client_count = 0;
         for (int i=0; i<MAX_CONNECTION; i++) {
             struct sockaddr_in socket_addr;
             socklen_t socket_addr_len = sizeof(socket_addr);
@@ -92,46 +96,60 @@ int main() {
                 break;
             }
 
-            client_fds[client_index] = client_fd;
-            client_index += 1;
+            client_fds[client_count] = client_fd;
+            client_count += 1;
             log_ip_port(&socket_addr, socket_addr_len);
         }
 
-        int max_fd = 0;
-        fd_set rfds, wfds;
-        FD_ZERO(&rfds);
-        FD_ZERO(&wfds);
-        for (int i=0; i<client_index; i++) {
-            int fd = client_fds[i];
-            FD_SET(fd, &rfds);
-            FD_SET(fd, &wfds);
-            if (max_fd < fd) {
-                max_fd = fd;
-            }
-        }
-
-        struct timeval tv;
-        tv.tv_sec = 4;
-        tv.tv_usec = 0;
-
-        int ret_val;
-        ret_val = select(max_fd + 1, &rfds, NULL, NULL, &tv);
-        printf("[Select] return value: %d\n", ret_val);
-        if (ret_val > 0) {
-            for (int i=0; i<client_index; i++) {
+        int has_unread_client = client_count;
+        do {
+            printf("[INFO] waiting clients: ");
+            for (int i=0; i<client_count; i++) {
                 int fd = client_fds[i];
-                if (FD_ISSET(fd, &rfds)) {
-                    char buf[256];
-                    int ret = read(fd, buf, sizeof(buf));
-                    printf("[DEBUG] read ret = %d\n", ret);
-                    printf("[Client %d] %s\n", fd, buf);
+                if (fd == -1) continue;
+                printf("%d ", fd);
+            }
+            printf("\n");
+
+            int max_fd = 0;
+            fd_set rfds, wfds;
+            FD_ZERO(&rfds);
+            FD_ZERO(&wfds);
+            for (int i=0; i<client_count; i++) {
+                int fd = client_fds[i];
+                if (fd == -1) continue;
+
+                FD_SET(fd, &rfds);
+                FD_SET(fd, &wfds);
+                if (max_fd < fd) {
+                    max_fd = fd;
                 }
             }
-        }
 
-        for (int i=0; i<client_index; i++) {
-            close(client_fds[i]);
-        }
+            int ret_val = select(max_fd + 1, &rfds, NULL, NULL, &tv);
+            printf("[Select] return value: %d\n", ret_val);
+            if (ret_val == -1) {
+                break;
+            }
+            if (ret_val > 0) {
+                for (int i=0; i<client_count; i++) {
+                    int fd = client_fds[i];
+                    if (fd == -1) continue;
+
+                    if (FD_ISSET(fd, &rfds)) {
+                        char buf[256];
+                        int ret = read(fd, buf, sizeof(buf));
+                        printf("[Client %d] %s\n", fd, buf);
+
+                        close(fd);
+                        client_fds[i] = -1;
+                        has_unread_client -= 1;
+                    }
+                }
+            }
+            printf("[DEBUG] client_count: %d\n", client_count);
+        } while(has_unread_client);
+
         printf("[DEBUG] Loop end\n");
     }
     return 0;
