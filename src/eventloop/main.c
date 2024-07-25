@@ -49,6 +49,7 @@ static void remove_client(EventLoop* eventloop, int client_fd) {
             Event* target_ev = ev->next;
             ev->next = target_ev->next;
             free_event(target_ev);
+            continue;
         }
         ev = ev->next;
     }
@@ -60,6 +61,10 @@ static void read_from_client(EventLoop* eventloop, int client_fd) {
     if (nread < 0) {
         logger("ERROR", "client read error");
         remove_client(eventloop, client_fd);
+    } else if (nread == 0) {
+        logger("INFO", "client %d closed", client_fd);
+        remove_client(eventloop, client_fd);
+        return;
     } else {
         logger("INFO", "client %d: %s", client_fd, buf);
     }

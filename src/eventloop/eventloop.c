@@ -62,7 +62,6 @@ void process_events(EventLoop* eventloop) {
                 ev->flags & READ_EVENT  && FD_ISSET(ev->fd, &rfds) ||
                 ev->flags & WRITE_EVENT && FD_ISSET(ev->fd, &wfds)
             ) {
-                logger("DEBUG", "resolving client %d", ev->fd);
                 ev->handler(eventloop, ev->fd);
             }
             ev = ev->next;
