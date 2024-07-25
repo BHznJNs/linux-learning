@@ -8,6 +8,7 @@
 #include <netinet/tcp.h>
 #include <unistd.h>
 #include "socket.h"
+#include "../utils.h"
 
 int create_socket() {
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -82,17 +83,4 @@ void check_connect(int socket_fd) {
     } else {
         printf("Connection successful.\n");
     }
-}
-
-void panic(const char *fmt, ...) {
-    va_list ap;
-    char msg[256];
-
-    if (!msg) return;
-    va_start(ap, fmt);
-    vsnprintf(msg, sizeof(msg), fmt, ap);
-    va_end(ap);
-
-    perror(msg);
-    exit(1);
 }

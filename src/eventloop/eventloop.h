@@ -1,24 +1,35 @@
 #ifndef __EVENTLOOP_H__
 #define __EVENTLOOP_H__
 
-#include <time.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
-typedef void EventCallback(int fd);
+#define READ_EVENT  1 << 0
+#define WRITE_EVENT 1 << 1
+
+typedef struct Event Event;
+typedef struct EventLoop EventLoop;
+
+typedef void EventHandler(EventLoop* eventloop, int fd);
 
 typedef struct Event {
     int fd;
-    EventCallback* callback;
-    struct Event* next;
+    int flags;
+    EventHandler* handler;
+    Event* next;
 } Event;
 
 typedef struct EventLoop {
     Event* event_head;
-    timeval loop_interval;
+    struct timeval* loop_interval;
 } EventLoop;
 
-EventLoop* create_eventloop();
+EventLoop* create_eventloop(void);
 void start_eventloop(EventLoop* eventloop);
-Event* create_event(EventCallback* callback);
-void append_event(Event* head, Event* ev);
+void process_events(EventLoop* eventloop);
+
+Event* create_event(int fd, int flags, EventHandler* handler);
+void free_event(Event* ev);
+void append_event(EventLoop* eventloop, Event* ev);
 
 #endif

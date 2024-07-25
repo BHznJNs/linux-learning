@@ -1,10 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
-
-void logger(const char* type, const char* fmt, ...);
-void panic(const char *fmt, ...);
-
-// --- --- --- --- --- ---
+#include <stdlib.h>
 
 void logger(const char* type, const char* fmt, ...) {
     va_list ap;
@@ -30,4 +26,3 @@ void panic(const char *fmt, ...) {
     perror(msg);
     exit(1);
 }
-
