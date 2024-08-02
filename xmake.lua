@@ -33,3 +33,17 @@ target("eventloop")
     add_files("src/eventloop/*.c")
     add_files("src/socket/socket.c")
     add_files("src/utils.c")
+
+-- -- -- -- -- -- -- -- -- --
+
+target("fork")
+    set_kind("binary")
+    add_files("src/fork/*.c")
+    add_files("src/utils.c")
+
+-- -- -- -- -- -- -- -- -- --
+
+target("dict")
+    set_kind("binary")
+    add_files("src/dict/*.c")
+    add_files("src/utils.c")
