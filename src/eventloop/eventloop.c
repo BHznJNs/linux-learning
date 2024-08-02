@@ -38,6 +38,28 @@ void append_event(EventLoop* eventloop, Event* ev) {
     eventloop->event_head = ev;
 }
 
+void remove_event(EventLoop* eventloop, int fd, int flags) {
+    Event* prev = NULL;
+    Event* ev = eventloop->event_head;
+
+    if (ev->fd == fd && ev->flags == flags) {
+        eventloop->event_head = ev->next;
+        free_event(ev);
+        return;
+    }
+
+    while (ev) {
+        if (ev->next && ev->next->fd == fd && ev->next->flags == flags) {
+            Event* next = ev->next;
+            ev->next = next->next;
+            free_event(next);
+            return;
+        }
+
+        ev = ev->next;
+    }
+}
+
 void process_events(EventLoop* eventloop) {
     fd_set rfds, wfds;
     FD_ZERO(&rfds);

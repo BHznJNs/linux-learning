@@ -31,5 +31,6 @@ void process_events(EventLoop* eventloop);
 Event* create_event(int fd, int flags, EventHandler* handler);
 void free_event(Event* ev);
 void append_event(EventLoop* eventloop, Event* ev);
+void remove_event(EventLoop* eventloop, int fd, int flags);
 
 #endif

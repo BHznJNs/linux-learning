@@ -37,22 +37,8 @@ static struct sockaddr_in* create_addr(int socket_fd, char* bindaddr, int port) 
 }
 
 static void remove_client(EventLoop* eventloop, int client_fd) {
-    Event* ev = eventloop->event_head;
-    if (ev->fd == client_fd) {
-        eventloop->event_head = ev->next;
-        free(ev);
-        ev = eventloop->event_head;
-    }
-
-    while (ev->next) {
-        if (ev->next->fd == client_fd) {
-            Event* target_ev = ev->next;
-            ev->next = target_ev->next;
-            free_event(target_ev);
-            continue;
-        }
-        ev = ev->next;
-    }
+    remove_event(eventloop, client_fd, READ_EVENT);
+    remove_event(eventloop, client_fd, WRITE_EVENT);
 }
 
 static void read_from_client(EventLoop* eventloop, int client_fd) {
@@ -76,7 +62,7 @@ static void reply_to_client(EventLoop* eventloop, int client_fd) {
     char msg[] = "message from server";
     write(client_fd, msg, sizeof(msg));
     logger("INFO", "reply: %s", msg);
-    remove_client(eventloop, client_fd);
+    remove_event(eventloop, client_fd, WRITE_EVENT);
 }
 
 static void accept_handler(EventLoop* eventloop, int server_fd) {
